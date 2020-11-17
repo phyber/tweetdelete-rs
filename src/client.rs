@@ -20,10 +20,53 @@ use crate::errors::Error;
 // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/timelines/api-reference/get-statuses-user_timeline
 const MAX_TIMELINE_COUNT: i32 = 200;
 
+// The stored Duration here isn't used for now, but in the future the delete
+// output should mention the age of the deleted Tweet.
 #[derive(Debug)]
-enum TweetAction {
+enum StatusAction {
     Delete(Duration),
     Keep(Duration),
+}
+
+#[derive(Debug)]
+struct Status<'a> {
+    tweet: &'a Tweet,
+}
+
+impl<'a> Status<'a> {
+    fn new(tweet: &'a Tweet) -> Self {
+        Self {
+            tweet: tweet,
+        }
+    }
+
+    // Checks the tweet age against a given max_age
+    fn action(&self, max_age: i64) -> StatusAction {
+        let now: DateTime<Utc> = Utc::now();
+        let diff = now - self.tweet.created_at;
+
+        if diff > Duration::days(max_age) {
+            StatusAction::Delete(diff)
+        }
+        else {
+            StatusAction::Keep(diff)
+        }
+    }
+
+    // Delete the tweet and give some output to log
+    async fn delete(&self, token: &Token) -> Result<Response<Tweet>, Error> {
+        let id = self.tweet.id;
+        let deleted: Response<Tweet> = delete(id, token).await?;
+
+        println!(
+            "{time}/{id}: {tweet}",
+            time=self.tweet.created_at,
+            id=id,
+            tweet=self.tweet.text,
+        );
+
+        Ok(deleted)
+    }
 }
 
 #[derive(Debug)]
@@ -43,13 +86,6 @@ impl Client {
         };
 
         Ok(client)
-    }
-
-    async fn delete(&self, id: u64)
-    -> Result<Response<Tweet>, Error> {
-        let deleted: Response<Tweet> = delete(id, &self.token).await?;
-
-        Ok(deleted)
     }
 
     // Process the timeline, deleting tweets older than max_age
@@ -72,24 +108,13 @@ impl Client {
 
             // Loop over statuses in the feed
             for status in &*feed {
-                let created_at = status.created_at;
-                let tweet_id   = status.id;
-                let tweet      = &status.text;
+                let status = Status::new(status);
 
-                match tweet_action(created_at, max_age) {
-                    TweetAction::Delete(_) => {
-                        println!("DELORTED");
-                        num_deleted += 1;
-                    },
-                    _ => {},
+                if let StatusAction::Delete(_) = status.action(max_age) {
+                    status.delete(&self.token).await?;
+
+                    num_deleted += 1;
                 }
-
-                println!(
-                    "{time}/{id}: {tweet}",
-                    time=created_at,
-                    id=tweet_id,
-                    tweet=tweet,
-                );
             }
 
             // Get the next batch of Tweets
@@ -101,18 +126,5 @@ impl Client {
         }
 
         Ok(num_deleted)
-    }
-}
-
-// Checks the tweet age against our max age.
-fn tweet_action(created_at: DateTime<Utc>, max_age: i64) -> TweetAction {
-    let now: DateTime<Utc> = Utc::now();
-    let diff = now - created_at;
-
-    if diff > Duration::days(max_age) {
-        TweetAction::Delete(diff)
-    }
-    else {
-        TweetAction::Keep(diff)
     }
 }
