@@ -1,0 +1,23 @@
+[package]
+name = "tweetdelete-rs"
+version = "0.1.0"
+authors = ["David O'Rourke <david.orourke@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+chrono = "0.4"
+dirs = "3.0"
+env_logger = "0.8"
+serde = "1.0"
+serde_derive = "1.0"
+serde_yaml = "0.8"
+shellexpand = "2.0"
+thiserror = "1.0"
+tokio = "0.2"
+
+[dependencies.egg-mode]
+version = "0.15"
+default-features = false
+features = [
+    "rustls",
+]
