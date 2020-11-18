@@ -12,6 +12,7 @@ use egg_mode::{
     Response,
     Token,
 };
+use std::fmt;
 
 use crate::config::Config;
 use crate::errors::Error;
@@ -58,14 +59,21 @@ impl<'a> Status<'a> {
         let id = self.tweet.id;
         let deleted: Response<Tweet> = delete(id, token).await?;
 
-        println!(
-            "{time}/{id}: {tweet}",
-            time=self.tweet.created_at,
-            id=id,
-            tweet=self.tweet.text,
-        );
+        println!("{}", self);
 
         Ok(deleted)
+    }
+}
+
+impl<'a> fmt::Display for Status<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{time}/{id}: {tweet}",
+            time=self.tweet.created_at,
+            id=self.tweet.id,
+            tweet=self.tweet.text,
+        )
     }
 }
 
