@@ -25,6 +25,17 @@ async fn main() -> Result<(), Error> {
         config.set(Setting::DryRun(true));
     }
 
+    if matches.is_present("MAX_TWEET_AGE") {
+        let i: i64 = matches.value_of("MAX_TWEET_AGE")
+            // Unwrap safe, we just checked for its presence.
+            .unwrap()
+            .parse()
+            // Unwrap safe, this was validated the parse in the CLI validator.
+            .unwrap();
+
+        config.set(Setting::MaxTweetAge(i));
+    }
+
     let twitter = Twitter::new(config).await?;
     let num_deleted = twitter.process_timeline().await?;
 

@@ -17,6 +17,7 @@ use crate::errors::Error;
 #[derive(Debug)]
 pub enum Setting {
     DryRun(bool),
+    MaxTweetAge(i64),
 }
 
 // ApiConfig is always required in the config file
@@ -34,7 +35,7 @@ struct ApiConfig {
 struct GeneralConfig {
     dry_run: Option<bool>,
     log_file: Option<String>,
-    max_tweet_age: i64,
+    max_tweet_age: Option<i64>,
 }
 
 impl Default for GeneralConfig {
@@ -42,7 +43,7 @@ impl Default for GeneralConfig {
         Self {
             dry_run: None,
             log_file: None,
-            max_tweet_age: 180,
+            max_tweet_age: Some(180),
         }
     }
 }
@@ -74,7 +75,8 @@ impl Config {
     // Allows setting config
     pub fn set(&mut self, setting: Setting) {
         match setting {
-            Setting::DryRun(b) => self.general.dry_run = Some(b),
+            Setting::DryRun(b)      => self.general.dry_run = Some(b),
+            Setting::MaxTweetAge(i) => self.general.max_tweet_age = Some(i),
         }
     }
 
@@ -111,6 +113,9 @@ impl Config {
 
     // Return the maximum age of Tweets we want to keep
     pub fn max_tweet_age(&self) -> i64 {
-        self.general.max_tweet_age
+        match self.general.max_tweet_age {
+            Some(i) => i,
+            None    => panic!("max_tweet_age shouldn't be able to be None"),
+        }
     }
 }
