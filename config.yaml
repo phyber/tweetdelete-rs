@@ -1,0 +1,10 @@
+---
+api:
+  access_token_key: 'EXAMPLE'
+  access_token_secret: 'EXAMPLE'
+  consumer_key: 'EXAMPLE'
+  consumer_secret: 'EXAMPLE'
+
+general:
+  log_file: '~/.local/var/log/tweetdelete.log'
+  max_tweet_age: 180
