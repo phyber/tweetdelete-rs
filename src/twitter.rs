@@ -1,81 +1,19 @@
 // Deletes tweets older than the age specified in the config.
-use chrono::{
-    DateTime,
-    Duration,
-    Utc,
-};
 use egg_mode::{
     auth::verify_tokens,
-    tweet::delete,
     tweet::user_timeline,
-    tweet::Tweet,
-    Response,
     Token,
 };
-use std::fmt;
 
 use crate::config::Config;
 use crate::errors::Error;
 
+mod status;
+use status::*;
+
 // Maximum number of tweets we can request per API call.
 // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/timelines/api-reference/get-statuses-user_timeline
 const MAX_TIMELINE_COUNT: i32 = 200;
-
-// The stored Duration here isn't used for now, but in the future the delete
-// output should mention the age of the deleted Tweet.
-#[derive(Debug)]
-enum StatusAction {
-    Delete(Duration),
-    Keep(Duration),
-}
-
-#[derive(Debug)]
-struct Status<'a> {
-    tweet: &'a Tweet,
-}
-
-impl<'a> Status<'a> {
-    fn new(tweet: &'a Tweet) -> Self {
-        Self {
-            tweet: tweet,
-        }
-    }
-
-    // Checks the tweet age against a given max_age
-    fn action(&self, max_age: i64) -> StatusAction {
-        let now: DateTime<Utc> = Utc::now();
-        let diff = now - self.tweet.created_at;
-
-        if diff > Duration::days(max_age) {
-            StatusAction::Delete(diff)
-        }
-        else {
-            StatusAction::Keep(diff)
-        }
-    }
-
-    // Delete the tweet and give some output to log
-    async fn delete(&self, token: &Token) -> Result<Response<Tweet>, Error> {
-        let id = self.tweet.id;
-        let deleted: Response<Tweet> = delete(id, token).await?;
-
-        println!("{}", self);
-
-        Ok(deleted)
-    }
-}
-
-impl<'a> fmt::Display for Status<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{time}/{id}: {tweet}",
-            time=self.tweet.created_at,
-            id=self.tweet.id,
-            tweet=self.tweet.text,
-        )
-    }
-}
 
 #[derive(Debug)]
 pub struct Twitter {
