@@ -78,12 +78,12 @@ impl<'a> fmt::Display for Status<'a> {
 }
 
 #[derive(Debug)]
-pub struct Client {
+pub struct Twitter {
     token: Token,
     user_id: u64,
 }
 
-impl Client {
+impl Twitter {
     pub async fn new(config: Config) -> Result<Self, Error> {
         let token = config.access_token();
         let verified = verify_tokens(&token).await?;
