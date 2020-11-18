@@ -14,6 +14,11 @@ use std::path::Path;
 
 use crate::errors::Error;
 
+#[derive(Debug)]
+pub enum Setting {
+    DryRun(bool),
+}
+
 // ApiConfig is always required in the config file
 #[derive(Debug, Serialize, Deserialize)]
 struct ApiConfig {
@@ -27,6 +32,7 @@ struct ApiConfig {
 // Default impl
 #[derive(Debug, Serialize, Deserialize)]
 struct GeneralConfig {
+    dry_run: Option<bool>,
     log_file: Option<String>,
     max_tweet_age: i64,
 }
@@ -34,6 +40,7 @@ struct GeneralConfig {
 impl Default for GeneralConfig {
     fn default() -> Self {
         Self {
+            dry_run: None,
             log_file: None,
             max_tweet_age: 180,
         }
@@ -64,6 +71,13 @@ impl Config {
         Ok(config)
     }
 
+    // Allows setting config
+    pub fn set(&mut self, setting: Setting) {
+        match setting {
+            Setting::DryRun(b) => self.general.dry_run = Some(b),
+        }
+    }
+
     // Return an access token based on the config values.
     pub fn access_token(&self) -> Token {
         let consumer_token = KeyPair::new(
@@ -79,6 +93,13 @@ impl Config {
         Token::Access {
             access: access_token,
             consumer: consumer_token,
+        }
+    }
+
+    pub fn dry_run(&self) -> bool {
+        match self.general.dry_run {
+            Some(b) => b,
+            None    => false,
         }
     }
 

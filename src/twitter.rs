@@ -17,6 +17,7 @@ const MAX_TIMELINE_COUNT: i32 = 200;
 
 #[derive(Debug)]
 pub struct Twitter {
+    config: Config,
     token: Token,
     user_id: u64,
 }
@@ -27,6 +28,7 @@ impl Twitter {
         let verified = verify_tokens(&token).await?;
 
         let client = Self {
+            config: config,
             token: token,
             user_id: verified.id,
         };
@@ -35,7 +37,14 @@ impl Twitter {
     }
 
     // Process the timeline, deleting tweets older than max_age
-    pub async fn process_timeline(&self, max_age: i64) -> Result<usize, Error> {
+    pub async fn process_timeline(&self) -> Result<usize, Error> {
+        let dry_run = self.config.dry_run();
+        let max_age = self.config.max_tweet_age();
+
+        if dry_run {
+            println!("DryRun mode enabled, no Tweets will be deleted.");
+        }
+
         // Get our own timeline, including replies and RTs.
         let timeline = user_timeline(self.user_id, true, true, &self.token)
             .with_page_size(MAX_TIMELINE_COUNT);
@@ -57,9 +66,13 @@ impl Twitter {
                 let status = Status::new(status);
 
                 if let StatusAction::Delete(_) = status.action(max_age) {
-                    status.delete(&self.token).await?;
-
-                    num_deleted += 1;
+                    if dry_run {
+                        println!("DryRun - Would have deleted: {}", status);
+                    }
+                    else {
+                        status.delete(&self.token).await?;
+                        num_deleted += 1;
+                    }
                 }
             }
 
