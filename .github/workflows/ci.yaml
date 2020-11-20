@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 1
       - name: 'Target Cache'
-        uses: 'actions/cache@v1'
+        uses: 'actions/cache@v2'
         env:
           cache-name: 'cargo-cache'
         with:
