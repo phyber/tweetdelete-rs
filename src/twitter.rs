@@ -41,10 +41,6 @@ impl Twitter {
         let dry_run = self.config.dry_run();
         let max_age = self.config.max_tweet_age();
 
-        if dry_run {
-            println!("DryRun mode enabled, no Tweets will be deleted.");
-        }
-
         // Get our own timeline, including replies and RTs.
         let timeline = user_timeline(self.user_id, true, true, &self.token)
             .with_page_size(MAX_TIMELINE_COUNT);

@@ -4,6 +4,7 @@ mod config;
 mod errors;
 mod twitter;
 
+use chrono::Utc;
 use config::{
     Config,
     Setting,
@@ -23,6 +24,11 @@ async fn main() -> Result<(), Error> {
     // file.
     if matches.is_present("DRY_RUN") {
         config.set(Setting::DryRun(true));
+
+        println!(
+            "{time}: DryRun mode enabled, no Tweets will be deleted.",
+            time=Utc::now(),
+        );
     }
 
     if matches.is_present("MAX_TWEET_AGE") {
@@ -39,7 +45,11 @@ async fn main() -> Result<(), Error> {
     let twitter = Twitter::new(config).await?;
     let num_deleted = twitter.process_timeline().await?;
 
-    println!("Finished. {count} tweets deleted.", count=num_deleted);
+    println!(
+        "{time}: Finished. {count} tweets deleted.",
+        time=Utc::now(),
+        count=num_deleted,
+    );
 
     Ok(())
 }
