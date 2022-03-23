@@ -28,8 +28,8 @@ impl Twitter {
         let verified = verify_tokens(&token).await?;
 
         let client = Self {
-            config: config,
-            token: token,
+            config,
+            token,
             user_id: verified.id,
         };
 

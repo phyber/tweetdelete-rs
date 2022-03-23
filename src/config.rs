@@ -7,7 +7,6 @@ use serde_derive::{
     Deserialize,
     Serialize,
 };
-use serde_yaml;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -99,10 +98,7 @@ impl Config {
     }
 
     pub fn dry_run(&self) -> bool {
-        match self.general.dry_run {
-            Some(b) => b,
-            None    => false,
-        }
+        self.general.dry_run.unwrap_or(false)
     }
 
     // Return the path to the logfile

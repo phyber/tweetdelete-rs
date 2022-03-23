@@ -2,7 +2,7 @@
 name = "tweetdelete"
 version = "0.1.0"
 authors = ["David O'Rourke <david.orourke@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "Utility for quickly deleting old Tweets"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/phyber/tweetdelete-rs"
@@ -22,19 +22,33 @@ exclude = [
 
 [dependencies]
 chrono = "0.4"
-clap = "2.33"
-dirs = "3.0"
-env_logger = "0.8"
+dirs = "4.0"
+env_logger = "0.9"
 serde = "1.0"
 serde_derive = "1.0"
 serde_yaml = "0.8"
 shellexpand = "2.0"
 thiserror = "1.0"
-tokio = "0.2"
+
+[dependencies.clap]
+version = "3.1"
+default-features = false
+features = [
+    "cargo",
+    "env",
+    "std",
+]
 
 [dependencies.egg-mode]
-version = "0.15"
+version = "0.16"
 default-features = false
 features = [
     "rustls",
+]
+
+[dependencies.tokio]
+version = "1.0"
+features = [
+    "macros",
+    "rt-multi-thread",
 ]

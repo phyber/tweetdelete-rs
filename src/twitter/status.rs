@@ -30,7 +30,7 @@ pub struct Status<'a> {
 impl<'a> Status<'a> {
     pub fn new(tweet: &'a Tweet) -> Self {
         Self {
-            tweet: tweet,
+            tweet,
         }
     }
 
@@ -69,3 +69,41 @@ impl<'a> fmt::Display for Status<'a> {
         )
     }
 }
+
+//impl From<Tweet> for Status {
+//    fn from(tweet: Tweet) -> Self {
+//        Self::new(tweet)
+//    }
+//}
+//
+//#[cfg(test)]
+//mod tests {
+//    use super::*;
+//    use std::io::{
+//        self,
+//        BufReader,
+//    };
+//    use std::fs::File;
+//
+//    fn load_tweets(filename: &str) -> Vec<Tweet> {
+//        let file = File::open(filename).unwrap();
+//        let reader = BufReader::new(file);
+//        let mut buffer = String::new();
+//        reader.read_to_string(&mut buffer).unwrap();
+//        let tweets: Vec<Tweet> = buffer.into();
+//
+//        tweets
+//    }
+//
+//    fn get_tweets_from_timeline<'a>() -> Vec<Status<'a>> {
+//        let tweets = load_tweets("test-data/user_timeline.json");
+//
+//        tweets.into_iter().map(Status::from).collect()
+//    }
+//
+//    #[test]
+//    fn test_status_action() {
+//        let tweets = get_tweets_from_timeline();
+//
+//    }
+//}

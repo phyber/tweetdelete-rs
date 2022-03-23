@@ -3,12 +3,12 @@ use clap::{
     crate_description,
     crate_name,
     crate_version,
-    App,
     Arg,
     ArgMatches,
+    Command,
 };
 
-fn is_valid_max_tweet_age(v: String) -> Result<(), String> {
+fn is_valid_max_tweet_age(v: &str) -> Result<(), String> {
     let i: i64 = match v.parse() {
         Ok(i)  => Ok(i),
         Err(e) => Err(format!("{}", e)),
@@ -21,13 +21,13 @@ fn is_valid_max_tweet_age(v: String) -> Result<(), String> {
     Ok(())
 }
 
-fn create_app<'a, 'b>() -> App<'a, 'b> {
-    App::new(crate_name!())
+fn create_app<'a>() -> Command<'a> {
+    Command::new(crate_name!())
         .version(crate_version!())
         .about(crate_description!())
         // Flags
         .arg(
-            Arg::with_name("DRY_RUN")
+            Arg::new("DRY_RUN")
                 .env("DRY_RUN")
                 .long("dry-run")
                 .help("Show what would have been deleted without deleting.")
@@ -35,7 +35,7 @@ fn create_app<'a, 'b>() -> App<'a, 'b> {
         )
         // Options
         .arg(
-            Arg::with_name("MAX_TWEET_AGE")
+            Arg::new("MAX_TWEET_AGE")
                 .env("MAX_TWEET_AGE")
                 .hide_env_values(true)
                 .value_name("DAYS")
@@ -46,6 +46,6 @@ fn create_app<'a, 'b>() -> App<'a, 'b> {
         )
 }
 
-pub fn parse_args<'a>() -> ArgMatches<'a> {
+pub fn parse_args() -> ArgMatches {
     create_app().get_matches()
 }
